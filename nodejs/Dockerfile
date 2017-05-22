@@ -7,4 +7,6 @@ RUN apt-get update && \
 
 COPY ./files /var/nodejs/
 
+EXPOSE 3128 
+
 CMD nodejs /var/nodejs/main.js
