@@ -1,0 +1,67 @@
+-   hosts: webservers
+
+    become: true
+    gather_facts: false
+    pre_tasks:
+    -   name: Instala python2 caso não tiver pro Ansible executar as funções
+        raw: bash -c "test -e /usr/bin/python || (apt -qqy update && apt install -qqy python-minimal)"
+        register: output
+        changed_when: output.stdout != ""
+
+    tasks:
+    -   name: Atualiza Cache
+        apt:
+            update_cache: yes
+                   
+    -   name: Instala aptitude
+        apt:
+            name: aptitude
+            state: latest
+            
+    -   name: Atualiza programas e o sistema operacional
+        apt:
+            upgrade: full
+     
+      
+    -   name: Instala pacotes básicos
+        apt: name={{item}} state=installed
+        with_items:
+            -   apt-transport-https
+            -   ca-certificates
+            -   curl
+     
+    -   name: Adiciona a chave do Jenkins    
+        apt_key:
+            url: "https://pkg.jenkins.io/debian/jenkins.io.key"
+            state: present     
+      
+    -   name: Adiciona repositório do Jenkins         
+        apt_repository:
+            repo: deb https://pkg.jenkins.io/debian binary/
+            state: present  
+            
+    -   name: Instala o Jenkins 
+        apt:
+            update_cache: yes
+            name: jenkins
+            state: latest    
+                
+
+
+    -   name: Baixa script de instalação do Docker e Compose
+        get_url:
+            url: https://bit.ly/docker-install
+            dest: /tmp/script.sh 
+            
+    -   name: Instala o Docker e Compose
+        shell: sh /tmp/script.sh 
+        
+        
+    -   name: Habilita a API do Docker
+        shell: echo -e "[Service]\nExecStart=/usr/bin/docker daemon -H fd:// -H tcp://0.0.0.0:7070" > /lib/systemd/system/docker.service
+        
+    -   name: Reinicia serviços
+        shell: systemctl daemon-reload && service docker restart
+           
+    -   name: Exclui todos os arquivos da pasta temporária
+        shell: rm -rf /tmp/*
