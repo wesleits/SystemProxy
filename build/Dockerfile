@@ -5,8 +5,6 @@ RUN apt-get update && \
 	curl -sL https://deb.nodesource.com/setup_7.x | bash - && \
 	apt-get install -y nodejs
 
-COPY ./files /var/nodejs/
-
-EXPOSE 3128 
+COPY ../nodejs /var/nodejs/
 
 CMD nodejs /var/nodejs/main.js
