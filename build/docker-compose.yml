@@ -1,0 +1,6 @@
+version: '2'
+services:
+  proxysystem:
+    build: .
+    ports:
+     - "3128:3128" 
