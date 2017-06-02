@@ -1,38 +1,31 @@
 var http = require('http');
-var os = require('os');
-var ifaces = os.networkInterfaces();
+
+
 
 http.createServer(function (req, res) 
 {
 	res.writeHead(200, {'Content-Type': 'text/plain'});
 
-	Object.keys(ifaces).forEach(function (ifname) 
-	{
-		var alias = 0;
+	var options = {
+		host: 'arenacosplay.tempsite.ws',
+		path: '/ip'
+	}
+	var request = http.request(options, function (cres) {
+		var data = '';
+		cres.on('data', function (chunk) {
+			data += chunk;
+		});
+		cres.on('end', function () {
+			res.end(data);
 
-		ifaces[ifname].forEach(function (iface) 
-		{
-			if ('IPv4' !== iface.family || iface.internal !== false) 
-			{
-				// skip over internal (i.e. 127.0.0.1) and non-ipv4 addresses
-				return;
-			}
-
-			if (alias >= 1) 
-			{
-				// this single interface has multiple ipv4 addresses
-				res.write(ifname + ':' + alias, iface.address + '\r\n');
-			} 
-			else 
-			{
-				// this interface has only one ipv4 adress
-				res.write(ifname, iface.address + '\r\n');
-			}
-			++alias;
 		});
 	});
+	request.on('error', function (e) {
+		res.end(e.message);
+	});
+	request.end();
 
-	res.end();
+	
 
 })
 .listen(3128); 
