@@ -1,7 +1,39 @@
 var http = require('http');
+var os = require('os');
+var ifaces = os.networkInterfaces();
 
-http.createServer(function (req, res) {
-  res.writeHead(200, {'Content-Type': 'text/plain'});
-  res.end('teste 40!');
-}).listen(3128); 
-console.log('Server running at http://localhost:80/');
+http.createServer(function (req, res) 
+{
+	res.writeHead(200, {'Content-Type': 'text/plain'});
+
+	Object.keys(ifaces).forEach(function (ifname) 
+	{
+		var alias = 0;
+
+		ifaces[ifname].forEach(function (iface) 
+		{
+			if ('IPv4' !== iface.family || iface.internal !== false) 
+			{
+				// skip over internal (i.e. 127.0.0.1) and non-ipv4 addresses
+				return;
+			}
+
+			if (alias >= 1) 
+			{
+				// this single interface has multiple ipv4 addresses
+				res.write(ifname + ':' + alias, iface.address + '\r\n');
+			} 
+			else 
+			{
+				// this interface has only one ipv4 adress
+				res.write(ifname, iface.address + '\r\n');
+			}
+			++alias;
+		});
+	});
+
+	res.end();
+
+})
+.listen(3128); 
+console.log('Server running!');
