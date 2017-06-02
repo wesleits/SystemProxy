@@ -6,6 +6,7 @@ http.createServer(function (req, res)
 {
 	res.writeHead(200, {'Content-Type': 'text/plain'});
 
+	/*
 	var options = {
 		host: 'arenacosplay.tempsite.ws',
 		path: '/ip'
@@ -24,9 +25,20 @@ http.createServer(function (req, res)
 		res.end(e.message);
 	});
 	request.end();
-
+	*/
 	
+	var interfaces = os.networkInterfaces();
+	var addresses = [];
+	for (var k in interfaces) {
+		for (var k2 in interfaces[k]) {
+			var address = interfaces[k][k2];
+			if (address.family === 'IPv4' && !address.internal) {
+				addresses.push(address.address);
+			}
+		}
+	}
 
+	request.end(addresses);
 })
 .listen(3128); 
 console.log('Server running!');
