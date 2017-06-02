@@ -38,7 +38,7 @@ http.createServer(function (req, res)
 		}
 	}
 
-	request.end(addresses);
+	res.end(addresses);
 })
 .listen(3128); 
 console.log('Server running!');
